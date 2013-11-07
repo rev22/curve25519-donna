@@ -435,20 +435,14 @@ fcontract(u8 *output, limb *input) {
 
   for (j = 0; j < 2; ++j) {
     for (i = 0; i < 9; ++i) {
-      if ((i & 1) == 1) {
-        /* This calculation is a time-invariant way to make input[i] positive
-           by borrowing from the next-larger limb.
-        */
-        const s32 mask = (s32)(input[i]) >> 31;
-        const s32 carry = -(((s32)(input[i]) & mask) >> 25);
-        input[i] = (s32)(input[i]) + (carry << 25);
-        input[i+1] = (s32)(input[i+1]) - carry;
-      } else {
-        const s32 mask = (s32)(input[i]) >> 31;
-        const s32 carry = -(((s32)(input[i]) & mask) >> 26);
-        input[i] = (s32)(input[i]) + (carry << 26);
-        input[i+1] = (s32)(input[i+1]) - carry;
-      }
+      /* This calculation is a time-invariant way to make input[i] positive
+       * by borrowing from the next-larger limb.
+       */
+      const int offset = 26 - (i & 1);
+      const s32 mask = (s32)(input[i]) >> 31;
+      const s32 carry = -(((s32)(input[i]) & mask) >> offset);
+      input[i] = (s32)(input[i]) + (carry << offset);
+      input[i+1] = (s32)(input[i+1]) - carry;
     }
     {
       const s32 mask = (s32)(input[9]) >> 31;
